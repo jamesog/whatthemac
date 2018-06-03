@@ -4,7 +4,6 @@ package mac
 import (
 	"encoding/csv"
 	"io"
-	"os"
 )
 
 // Registration holds registration information for each MAC address prefix.
@@ -18,16 +17,10 @@ type Registration struct {
 type Assignments map[string]Registration
 
 // ReadAssignments reads the given CSV file and returns Assignments.
-func ReadAssignments(file string) (Assignments, error) {
+func ReadAssignments(file io.Reader) (Assignments, error) {
 	a := make(Assignments)
 
-	f, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	r := csv.NewReader(f)
+	r := csv.NewReader(file)
 	for {
 		rec, err := r.Read()
 		if err == io.EOF {

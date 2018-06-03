@@ -37,15 +37,20 @@ func main() {
 	macaddr := strings.Replace(hwaddr.String(), ":", "", -1)
 
 	// Read the Large list by default (MA-L)
-	mal, err := mac.ReadAssignments(largeFile)
+	mal, err := os.Open(largeFile)
 	if err != nil {
-		log.Fatalf("Could not load MA-L list: %v", err)
+		log.Fatalf("Could not open MA-L list: %v", err)
+	}
+	defer mal.Close()
+	entries, err := mac.ReadAssignments(mal)
+	if err != nil {
+		log.Fatalf("Could not read MA-L list: %v", err)
 	}
 
 	// Turn the MAC address into an upper-cased version of the first 6 chars
 	macoui := strings.ToUpper(macaddr[0:6])
 
-	if entry, ok := mal[macoui]; ok {
+	if entry, ok := entries[macoui]; ok {
 		fmt.Println(entry.Organization)
 		os.Exit(0)
 	}
@@ -55,11 +60,16 @@ func main() {
 	// Turn the MAC address into an upper-cased version of the first 8 chars
 	macoui = strings.ToUpper(macaddr[0:8])
 
-	mam, err := mac.ReadAssignments(mediumFile)
+	mam, err := os.Open(mediumFile)
 	if err != nil {
-		log.Fatalf("Could not load MA-M list: %v", err)
+		log.Fatalf("Could not open MA-M list: %v", err)
 	}
-	if entry, ok := mam[macoui]; ok {
+	defer mam.Close()
+	entries, err = mac.ReadAssignments(mam)
+	if err != nil {
+		log.Fatalf("Could not read MA-M list: %v", err)
+	}
+	if entry, ok := entries[macoui]; ok {
 		fmt.Println(entry.Organization)
 		os.Exit(0)
 	}
@@ -69,11 +79,16 @@ func main() {
 	// Turn the MAC address into an upper-cased version of the first 8 chars
 	macoui = strings.ToUpper(macaddr[0:9])
 
-	mas, err := mac.ReadAssignments(smallFile)
+	mas, err := os.Open(smallFile)
 	if err != nil {
-		log.Fatalf("Could not load MA-S list: %v", err)
+		log.Fatalf("Could not open MA-S list: %v", err)
 	}
-	if entry, ok := mas[macoui]; ok {
+	defer mas.Close()
+	entries, err = mac.ReadAssignments(mas)
+	if err != nil {
+		log.Fatalf("Could not read MA-S list: %v", err)
+	}
+	if entry, ok := entries[macoui]; ok {
 		fmt.Println(entry.Organization)
 		os.Exit(0)
 	}
